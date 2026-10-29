@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FloraFlow – Deep Focus</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <section id="splash" class="splash" aria-live="polite">
+    <img src="logo.png" alt="FloraFlow Deep Focus" class="splash-logo">
+    <p class="splash-sub">Гейміфікований таймер фокусу з віртуальним садом</p>
+    <div class="progress" aria-hidden="true"><span></span></div>
+    <p class="splash-ver">Версія 1.0.0</p>
+  </section>
+
+  <main id="main" class="main hidden">
+    <header class="bar">
+      <div class="bar-left">
+        <img src="icon.png" alt="" class="bar-icon">
+        <img src="wordmark.png" alt="FloraFlow" class="bar-logo">
+      </div>
+      <button id="theme-toggle" class="btn theme-btn" aria-label="Змінити тему">🌙</button>
+    </header>
+
+    <div class="content">
+      <section class="card">
+        <h2>Сесія фокусу</h2>
+        <p class="hint">Завершена сесія поливає рослину. Чотири сесії – і з паростка розквітне тюльпан.</p>
+        <div class="focus">
+          <div class="plant" id="plant" aria-live="polite"></div>
+          <div class="timer-box">
+            <div id="time" class="time" role="timer">25:00</div>
+            <div class="btns">
+              <button id="start" class="btn primary">Старт</button>
+              <button id="reset" class="btn">Скинути</button>
+              <button id="demo" class="btn" title="Завершити сесію одразу (для демонстрації)">Завершити (демо)</button>
+            </div>
+          </div>
+        </div>
+        <p id="status" class="status">Сесій завершено: 0 · Стадія: насіння</p>
+      </section>
+
+      <section class="card about" id="about">
+        <h2>Про застосунок</h2>
+        <div class="about-row">
+          <img src="icon.png" alt="" class="about-icon">
+          <dl>
+            <dt>Назва</dt><dd>FloraFlow – Deep Focus</dd>
+            <dt>Версія</dt><dd>1.0.0</dd>
+            <dt>Автор</dt><dd>Циганкова П. Д., гр. 621п</dd>
+            <dt>Рік</dt><dd>2026</dd>
+            <dt>Технології</dt><dd>HTML5, CSS3, JavaScript, SVG</dd>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
