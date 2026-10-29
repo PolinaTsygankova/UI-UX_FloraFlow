@@ -73,6 +73,7 @@ function resetTimer() {
    clearInterval(timerId);
    timerId = null;
    left = SESSION_MIN * 60;
+   sessions = 0;
    document.getElementById("start").textContent = "Старт";
    render();
 }
