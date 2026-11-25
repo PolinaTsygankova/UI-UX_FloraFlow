@@ -1,63 +1,229 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FloraFlow – Deep Focus</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FloraFlow – Deep Focus</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <section id="splash" class="splash" aria-live="polite">
-    <img src="logo.png" alt="FloraFlow Deep Focus" class="splash-logo">
-    <p class="splash-sub">Гейміфікований таймер фокусу з віртуальним садом</p>
-    <div class="progress" aria-hidden="true"><span></span></div>
-    <p class="splash-ver">Версія 1.0.0</p>
-  </section>
+    <!-- Заставка (/splash) -->
+    <section id="splash" class="splash" aria-live="polite">
+        <img src="logo.png" alt="FloraFlow Deep Focus" class="splash-logo">
+        <div class="splash-fallback">🌱 FloraFlow</div>
+        <p class="splash-sub">Гейміфікований таймер фокусу з віртуальним садом</p>
+        <div class="progress" aria-hidden="true"><span></span></div>
+        <p class="splash-ver">Версія 1.1.0</p>
+    </section>
 
-  <main id="main" class="main hidden">
-    <header class="bar">
-      <div class="bar-left">
-        <img src="icon.png" alt="" class="bar-icon">
-        <img src="wordmark.png" alt="FloraFlow" class="bar-logo">
-      </div>
-      <button id="theme-toggle" class="btn theme-btn" aria-label="Змінити тему">🌙</button>
-    </header>
-
-    <div class="content">
-      <section class="card">
-        <h2>Сесія фокусу</h2>
-        <p class="hint">Завершена сесія поливає рослину. Чотири сесії – і з паростка розквітне тюльпан.</p>
-        <div class="focus">
-          <div class="plant" id="plant" aria-live="polite"></div>
-          <div class="timer-box">
-            <div id="time" class="time" role="timer">25:00</div>
-            <div class="btns">
-              <button id="start" class="btn primary">Старт</button>
-              <button id="reset" class="btn">Скинути</button>
-              <button id="demo" class="btn" title="Завершити сесію одразу (для демонстрації)">Завершити (демо)</button>
+    <!-- Основний застосунок -->
+    <div id="app" class="app hidden">
+        <header class="bar">
+            <div class="bar-left">
+                <img src="icon.png" alt="" class="bar-icon">
+                <span class="bar-title">FloraFlow</span>
             </div>
-          </div>
-        </div>
-        <p id="status" class="status">Сесій завершено: 0 · Стадія: насіння</p>
-      </section>
+            <div class="bar-actions">
+                <button id="theme-toggle" class="icon-btn" aria-label="Змінити тему" title="Змінити тему">🌙</button>
+                <button id="nav-settings" class="icon-btn" aria-label="Налаштування" title="Налаштування">⚙️</button>
+            </div>
+        </header>
 
-      <section class="card about" id="about">
-        <h2>Про застосунок</h2>
-        <div class="about-row">
-          <img src="icon.png" alt="" class="about-icon">
-          <dl>
-            <dt>Назва</dt><dd>FloraFlow – Deep Focus</dd>
-            <dt>Версія</dt><dd>1.0.0</dd>
-            <dt>Автор</dt><dd>Циганкова П. Д., гр. 621п</dd>
-            <dt>Рік</dt><dd>2026</dd>
-            <dt>Технології</dt><dd>HTML5, CSS3, JavaScript, SVG</dd>
-          </dl>
-        </div>
-      </section>
+        <main class="content">
+            <!-- 1. РОЗДІЛ «ФОКУС» (/home) -->
+            <section id="view-home" class="view">
+                <!-- Error State: Перервана сесія (REQ-UX-06/07) -->
+                <div id="interrupted-state" class="card state-card error-box hidden">
+                    <h3>Сесію було перервано</h3>
+                    <p id="interrupted-text">Вкладку закрили, але прогрес збережено: лишилось 12:40</p>
+                    <div class="state-actions">
+                        <button id="btn-resume-interrupted" class="btn primary">Продовжити сесію</button>
+                        <button id="btn-discard-interrupted" class="btn">Почати заново</button>
+                    </div>
+                    <p class="no-penalty">Рослина не втрачається і штрафу немає</p>
+                </div>
+
+                <!-- Основний хаб таймера -->
+                <div id="focus-hub" class="card">
+                    <div class="card-header">
+                        <h2>Сесія фокусу</h2>
+                        <div class="duration-pills" role="group" aria-label="Вибір тривалості сесії">
+                            <button class="pill" data-min="15">15 хв</button>
+                            <button class="pill active" data-min="25">25 хв</button>
+                            <button class="pill" data-min="50">50 хв</button>
+                        </div>
+                    </div>
+                    <p class="hint">Кожна завершена сесія поливає поточну рослину (4 етапи до квітки).</p>
+
+                    <div class="focus">
+                        <div class="plant" id="plant" aria-live="polite"></div>
+                        <div class="timer-box">
+                            <div id="time" class="time" role="timer">25:00</div>
+                            <div class="btns">
+                                <button id="start" class="btn primary">Почати</button>
+                                <button id="reset" class="btn">Скинути</button>
+                                <button id="demo" class="btn subtle" title="Завершити сесію одразу (для демонстрації)">+1 етап (демо)</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="status" class="status">Етап росту: 0 / 4 · Стадія: насіння</p>
+                </div>
+
+                <!-- Екран завершення та росту рослини -->
+                <div id="completion-card" class="card completion-card hidden">
+                    <div id="completion-plant" class="plant-celebrate"></div>
+                    <h3 id="completion-title">Сесію завершено!</h3>
+                    <p id="completion-desc">Рослина отримала воду та підросла.</p>
+                    <div class="state-actions">
+                        <button id="btn-next-session" class="btn primary">Ще сесію</button>
+                        <button id="btn-go-garden" class="btn">Переглянути сад</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. РОЗДІЛ «САД» (/garden) -->
+            <section id="view-garden" class="view hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Мій сад</h2>
+                        <span id="garden-count" class="badge">0 рослин</span>
+                    </div>
+
+                    <!-- Empty State: Порожній сад -->
+                    <div id="garden-empty" class="empty-state">
+                        <div class="empty-sprout">🌱</div>
+                        <h3>Тут ще порожньо</h3>
+                        <p>Заверши першу сесію фокусу — і в саду почне рости твоя перша рослина.</p>
+                        <button class="btn primary go-focus-btn">Почати сесію</button>
+                    </div>
+
+                    <!-- Сітка вирощених та активної рослин -->
+                    <div id="garden-grid" class="garden-grid hidden"></div>
+                </div>
+            </section>
+
+            <!-- 3. РОЗДІЛ «СТАТИСТИКА» (/stats) -->
+            <section id="view-stats" class="view hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Тижнева статистика</h2>
+                        <span id="stats-total" class="badge">0 хв за тиждень</span>
+                    </div>
+                    <p class="hint">Приватна статистика прогресу. Дані зберігаються лише на вашому пристрої.</p>
+
+                    <!-- Empty State: Порожня статистика -->
+                    <div id="stats-empty" class="empty-state">
+                        <div class="empty-sprout">📊</div>
+                        <h3>Даних ще немає</h3>
+                        <p>Почни першу сесію, щоб побачити свій ритм фокусу протягом тижня.</p>
+                        <button class="btn primary go-focus-btn">Почни першу сесію</button>
+                    </div>
+
+                    <!-- Графік хвилин фокусу по днях -->
+                    <div id="stats-chart-wrap" class="chart-wrap hidden">
+                        <div id="stats-bars" class="bars" aria-label="Графік хвилин фокусу за 7 днів"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. РОЗДІЛ «НАЛАШТУВАННЯ» (/settings) -->
+            <section id="view-settings" class="view hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Налаштування</h2>
+                        <button id="btn-close-settings" class="btn subtle">← Назад</button>
+                    </div>
+
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div>
+                                <strong>Тривалість за замовчуванням</strong>
+                                <p class="setting-desc">Застосовується до кожної нової сесії</p>
+                            </div>
+                            <div class="duration-pills" id="settings-duration">
+                                <button class="pill" data-min="15">15 хв</button>
+                                <button class="pill active" data-min="25">25 хв</button>
+                                <button class="pill" data-min="50">50 хв</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div>
+                                <strong>Звук сповіщень</strong>
+                                <p class="setting-desc">М'який звуковий сигнал після завершення таймера</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-sound" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div>
+                                <strong>Системні сповіщення</strong>
+                                <p class="setting-desc">Нагадування браузера про завершення сесії</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-notif">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Error State: Сповіщення заблоковано -->
+                        <div id="notif-error" class="error-box hidden">
+                            <strong>Сповіщення заблоковано</strong>
+                            <p>Браузер не дозволяє показувати сповіщення. Таймер працюватиме, але про кінець сесії не нагадає.</p>
+                            <button id="btn-notif-help" class="btn">Як увімкнути</button>
+                            <p id="notif-help-text" class="help-text hidden">
+                                Натисніть на іконку замка 🔒 або налаштувань зліва від адреси сайту в браузері → знайдіть пункт «Сповіщення» → оберіть «Дозволити» та оновіть сторінку.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Підекрани 2 рівня: Про застосунок -->
+                <div class="card about" id="about">
+                    <h2>Про застосунок</h2>
+                    <div class="about-row">
+                        <img src="icon.png" alt="" class="about-icon">
+                        <dl>
+                            <dt>Назва</dt>
+                            <dd>FloraFlow – Deep Focus</dd>
+                            <dt>Версія</dt>
+                            <dd>1.1.0 (Lab 3 IA & Flows)</dd>
+                            <dt>Автор</dt>
+                            <dd>Циганкова П. Д., гр. 621п</dd>
+                            <dt>Рік</dt>
+                            <dd>2026</dd>
+                            <dt>Технології</dt>
+                            <dd>HTML5, CSS3, JavaScript, SVG, LocalStorage</dd>
+                        </dl>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Нижня панель вкладок (Tab Bar) -->
+        <nav class="tab-bar" aria-label="Основна навігація">
+            <button class="tab-btn active" data-tab="home">
+                <span class="tab-icon">⏱️</span>
+                <span>Фокус</span>
+            </button>
+            <button class="tab-btn" data-tab="garden">
+                <span class="tab-icon">🌿</span>
+                <span>Сад</span>
+            </button>
+            <button class="tab-btn" data-tab="stats">
+                <span class="tab-icon">📈</span>
+                <span>Статистика</span>
+            </button>
+        </nav>
     </div>
-  </main>
 
-  <script src="app.js"></script>
+    <!-- Тост-підтвердження автозбереження -->
+    <div id="toast" class="toast" role="status" aria-live="polite">Зміни збережено</div>
+
+    <script src="app.js"></script>
 </body>
 </html>
